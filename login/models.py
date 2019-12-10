@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 from django.contrib.auth.models import BaseUserManager
 
@@ -67,3 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+
+    class Meta:
+        verbose_name = "Utilisateur"
+        # verbose_name_plural = "Utilisateurs"
