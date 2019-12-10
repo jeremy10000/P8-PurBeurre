@@ -11,7 +11,7 @@ from .models import Product, Substitute
 
 
 class Search(ListView):
-    """ Return products from database """
+    """ Search for Products. """
 
     template_name = 'product/search.html'
     paginate_by = 6
@@ -37,7 +37,7 @@ class Search(ListView):
 
 
 class Proposition(ListView):
-    """ Substitute propostion """
+    """ product proposal """
 
     template_name = 'product/proposition.html'
     paginate_by = 6
@@ -50,7 +50,7 @@ class Proposition(ListView):
             return redirect('index')
 
     def get_queryset(self):
-        """ Return products form same category """
+        """ Products of the same category. """
 
         self._id = self.kwargs['product_id']
         self.product = Product.objects.get(pk=self._id)
@@ -68,14 +68,14 @@ class Proposition(ListView):
 
 
 class Detail(DetailView):
-    """ Product detail """
+    """ Details of the Products. """
     model = Product
     template_name = "product/detail.html"
 
 
 @login_required
 def save_view(request):
-    """ Save product and substitute """
+    """ Save Products. """
 
     if request.method == 'POST':
 
@@ -108,7 +108,7 @@ def save_view(request):
 
 
 class Favorites(LoginRequiredMixin, ListView):
-    """ User favorites products """
+    """ User's products """
 
     template_name = 'product/favorites.html'
     paginate_by = 6
@@ -119,5 +119,6 @@ class Favorites(LoginRequiredMixin, ListView):
 
 
 class DeleteView(LoginRequiredMixin, DeleteView):
+    """ Delete User Products """
     model = Substitute
     success_url = reverse_lazy('product:favorites')
