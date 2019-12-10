@@ -61,10 +61,10 @@ class Command(BaseCommand):
 
     def my_request(self):
         """ Request Openfoodfacts """
-
-        self.stdout.write(self.style.SQL_TABLE(
-            'Product request for : "%s" [ Nutriscore %s ]'
-            % (self.category, self.nutriscore)))
+        if STDOUT:
+            self.stdout.write(self.style.SQL_TABLE(
+                'Product request for : "%s" [ Nutriscore %s ]'
+                % (self.category, self.nutriscore)))
 
         product_request = requests.get(
             "https://fr.openfoodfacts.org/cgi/search.pl?"

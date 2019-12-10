@@ -20,8 +20,9 @@ class JoinForm(UserCreationForm):
         label="Adresse mail",
         widget=EmailInput(attrs={'class': 'form-control'}),
         error_messages={
-            'required': 'Please let us know what to call you!',
-            'unique': 'Please mange let us know what to call you!'})
+            'required': 'Il faut renseigner un email',
+            'invalid': 'Cet email est invalid',
+            'unique': 'Cet email existe déjà.'})
 
     password1 = forms.CharField(
         label="Mot de passe",

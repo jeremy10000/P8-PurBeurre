@@ -130,8 +130,7 @@ class ProductTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # id=1 because self.client.get('/product/proposition/1')
-        if not Product.objects.get(id=1) in
-        response.context_data["object_list"]:
+        if not Product.objects.get(id=1) in response.context_data["object_list"]:
             exclude_id = True
 
         self.assertTrue(exclude_id)
@@ -334,39 +333,44 @@ class ProductTest(TestCase):
 
 
 class CmdTest(TransactionTestCase):
+    """ test BaseCommand """
 
-    @patch("product.management.commands.add-level2.STDOUT", new_callable=bool)
+    @patch("product.management.commands.add-level.STDOUT", new_callable=bool)
     def test_add_level_errors(self, mock):
-
         mock = False
-        with self.assertRaises(TypeError):
-            call_command("add-level2", level=10)
 
         with self.assertRaises(TypeError):
-            call_command("add-level2")
+            call_command("add-level", level=10)
 
-    @patch("product.management.commands.add-level2.STDOUT")
+        with self.assertRaises(TypeError):
+            call_command("add-level")
+
+    @patch("product.management.commands.add-level.STDOUT", new_callable=bool)
     def test_add_level_success_and_integrity_error(self, mock):
-        mock.STDOUT.return_value = False
+        mock = False
 
         self.assertEqual(Level.objects.all().count(), 0)
 
-        call_command("add-level2", level="Very Low")
+        call_command("add-level", level="Very Low")
         self.assertEqual(Level.objects.all().count(), 1)
 
-        call_command("add-level2", level="Very Low")
+        call_command("add-level", level="Very Low")
         self.assertEqual(Level.objects.all().count(), 1)
 
-    # @patch("product.management.commands.add-level.LEVEL", new_callable=list)
-    def test_add_product_errors(self):
+    @patch("product.management.commands.add-product.STDOUT", new_callable=bool)
+    def test_add_product_errors(self, mock):
+        mock = False
 
         with self.assertRaises(TypeError):
-            call_command("add-level", nutriscore="o")
+            call_command("add-product", nutriscore="o")
 
         with self.assertRaises(TypeError):
-            call_command("add-level", category=12)
+            call_command("add-product", category=12)
 
-    def test_add_product_success_and_integrity_error(self):
+    @patch("product.management.commands.add-product.requests.get")
+    @patch("product.management.commands.add-product.STDOUT", new_callable=bool)
+    def test_add_product_success_and_error(self, mock, mock_json):
+        mock = False
         data = Level(name="high")
         data.save()
         data = Level(name="moderate")
@@ -374,11 +378,50 @@ class CmdTest(TransactionTestCase):
         data = Level(name="low")
         data.save()
 
+        mock_json.return_value.json.return_value = {
+            'products': [{
+                'nutrient_levels': {
+                    'sugars': 'low',
+                    'salt': 'low',
+                    'fat': 'high',
+                    'saturated-fat': 'moderate',
+                },
+                'nutriments': {
+                    'salt_100g': '1.1',
+                    'sugars_100g': '1.09',
+                    'fat_100g': '22.15',
+                    'saturated-fat_100g': '10.2',
+                },
+                'image_url': 'https://image.fr',
+                'nutrition_grade_fr': ['a'],
+                'url': 'https://url.fr',
+                'product_name_fr': 'Nom du Produit Mock', },
+
+                {
+                'nutrient_levels': {
+                    'sugars': 'low',
+                    'salt': 'low',
+                    'fat': 'high',
+                    'saturated-fat': 'moderate',
+                },
+                'nutriments': {
+                    'salt_100g': '1.1',
+                    'sugars_100g': '1.09',
+                    'fat_100g': '22.15',
+                    'saturated-fat_100g': '10.2',
+                },
+                'image_url': 'https://image2.fr',
+                'nutrition_grade_fr': ['a'],
+                'url': 'https://url2.fr',
+                'product_name_fr': 'Nom du Produit Mock 2',
+            }]
+        }
+
         self.assertEqual(Product.objects.all().count(), 0)
         self.assertEqual(Category.objects.all().count(), 0)
-        call_command("add-level", nutriscore="a", category="Desserts")
-        self.assertEqual(Product.objects.all().count(), 10)
+        call_command("add-product", nutriscore="a", category="Desserts")
+        self.assertEqual(Product.objects.all().count(), 2)
         self.assertEqual(Category.objects.all().count(), 1)
-        call_command("add-level", nutriscore="a", category="Desserts")
-        self.assertEqual(Product.objects.all().count(), 10)
+        call_command("add-product", nutriscore="a", category="Desserts")
+        self.assertEqual(Product.objects.all().count(), 2)
         self.assertEqual(Category.objects.all().count(), 1)
